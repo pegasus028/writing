@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEFR Adaptive Writing Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --ink:#1c1a17;--ink-soft:#57514a;--ink-faint:#8a827a;--paper:#faf7f2;--card:#fffdf9;
+        --line:#e7e0d5;--line-strong:#d8cfc0;--accent:#9a3412;--accent-soft:#c2613a;--accent-wash:#fbeee6;
+        --good:#3f6212;--good-wash:#f0f4e6;--warn:#b45309;--danger:#b91c1c;--danger-wash:#fdeceb;
+        --shadow:0 1px 2px rgba(60,48,32,.04),0 8px 30px rgba(60,48,32,.07);
+    }
+    *{box-sizing:border-box;}
+    html{-webkit-text-size-adjust:100%;}
+    body{font-family:"Inter",system-ui,sans-serif;background:var(--paper);
+        background-image:radial-gradient(circle at 18% 12%,#fff 0,transparent 38%),radial-gradient(circle at 85% 88%,#f4ede1 0,transparent 45%);
+        color:var(--ink);line-height:1.65;margin:0;padding:32px 18px 64px;min-height:100vh;}
+    .container{max-width:760px;margin:0 auto;background:var(--card);border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;}
+    .inner{padding:clamp(26px,5vw,52px);}
+    .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 14px;}
+    h1{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(2rem,6vw,2.9rem);line-height:1.05;letter-spacing:-.01em;margin:0 0 18px;}
+    h2{font-family:"Fraunces",serif;font-weight:600;font-size:1.7rem;margin:0 0 10px;}
+    h3{font-family:"Fraunces",serif;font-weight:600;font-size:1.25rem;margin:0 0 6px;}
+    .lede{font-size:1.06rem;color:var(--ink-soft);margin:0 0 16px;max-width:54ch;}
+    .meta-note{font-size:.9rem;color:var(--ink-faint);display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:26px 0 24px;}
+    .meta-note svg{flex:none;margin-top:3px;}
+    ul.rules{margin:0 0 30px;padding-left:18px;color:var(--ink-soft);font-size:.96rem;}
+    ul.rules li{margin-bottom:7px;}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(26px,5vw,52px);border-bottom:1px solid var(--line);}
+    .stage-label{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+    .stage-label b{color:var(--accent);font-weight:600;}
+    .pips{display:flex;gap:7px;}
+    .pip{width:9px;height:9px;border-radius:50%;background:var(--line-strong);transition:all .4s ease;}
+    .pip.done{background:var(--accent-soft);}
+    .pip.active{background:var(--accent);box-shadow:0 0 0 4px var(--accent-wash);transform:scale(1.15);}
+
+    .timer{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-weight:600;font-size:1.02rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 13px;transition:color .3s,background .3s,border-color .3s;}
+    .timer svg{flex:none;}
+    .timer.warn{color:var(--warn);background:#fdf6ec;border-color:#f0d9b5;}
+    .timer.danger{color:var(--danger);background:var(--danger-wash);border-color:#f3c9c6;animation:pulse 1s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+    .prompt-tag{display:inline-block;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);background:var(--accent-wash);border:1px solid #f0d3c4;padding:4px 11px;border-radius:14px;font-weight:600;margin-bottom:14px;}
+    .prompt-box{background:linear-gradient(180deg,#fffefb,#fdfaf4);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:22px 26px;margin:0 0 22px;}
+    .prompt-box p{font-family:"Newsreader",Georgia,serif;font-size:1.18rem;line-height:1.6;color:#2a2722;margin:0;}
+    .task-meta{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:.88rem;color:var(--ink-faint);margin:0 0 16px;}
+    .task-meta b{color:var(--ink-soft);font-weight:600;}
+
+    textarea{width:100%;min-height:240px;font-family:"Newsreader",Georgia,serif;font-size:1.1rem;line-height:1.7;color:var(--ink);
+        background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:18px 20px;resize:vertical;transition:border-color .18s;}
+    textarea:focus{outline:none;border-color:var(--accent-soft);}
+    textarea:disabled{background:var(--paper);color:var(--ink-faint);}
+    .wc-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:10px 2px 0;font-size:.9rem;color:var(--ink-faint);}
+    .wc-count{font-weight:600;font-variant-numeric:tabular-nums;}
+    .wc-count b{color:var(--accent);}
+    .wc-meter{flex:1;height:6px;background:var(--line);border-radius:4px;overflow:hidden;max-width:240px;margin:0 4px;}
+    .wc-fill{height:100%;width:0;background:var(--accent-soft);border-radius:4px;transition:width .3s ease;}
+    .wc-fill.met{background:var(--good);}
+
+    button{font-family:"Inter",sans-serif;background:var(--ink);color:#fff;border:none;padding:16px 28px;font-size:1.02rem;border-radius:11px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:24px;transition:background .2s,transform .08s;letter-spacing:.01em;}
+    button:hover{background:var(--accent);}
+    button:active{transform:scale(.99);}
+    button svg{transition:transform .2s;}
+    button:hover svg{transform:translateX(3px);}
+
+    .grading{text-align:center;padding:60px 20px;}
+    .spinner{width:42px;height:42px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;margin:0 auto 22px;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .grading p{color:var(--ink-soft);font-size:1.02rem;}
+
+    #results-screen{text-align:center;}
+    .result-badge{display:inline-block;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--good);background:var(--good-wash);border:1px solid #d8e4bf;padding:6px 14px;border-radius:20px;font-weight:600;margin-bottom:8px;}
+    .final-score{font-family:"Fraunces",serif;font-size:clamp(3.4rem,14vw,5.2rem);font-weight:600;color:var(--accent);margin:10px 0 14px;line-height:1;letter-spacing:-.02em;}
+    .feedback-text{font-size:1.08rem;color:var(--ink-soft);max-width:48ch;margin:0 auto 8px;}
+    .scale{display:flex;gap:4px;justify-content:center;margin:30px auto 8px;max-width:400px;}
+    .scale .step{flex:1;text-align:center;font-size:.74rem;font-weight:600;color:var(--ink-faint);padding:7px 2px;border-radius:7px;background:var(--paper);border:1px solid var(--line);}
+    .scale .step.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+    .traits{text-align:left;margin:34px 0 0;padding:26px;background:var(--paper);border:1px solid var(--line);border-radius:14px;}
+    .traits h3{margin-bottom:14px;}
+    .trait{margin-bottom:16px;}
+    .trait:last-child{margin-bottom:0;}
+    .trait-head{display:flex;justify-content:space-between;align-items:baseline;font-size:.92rem;margin-bottom:5px;}
+    .trait-head .tname{font-weight:600;color:var(--ink);}
+    .trait-head .tval{color:var(--ink-faint);font-size:.82rem;}
+    .trait-bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden;}
+    .trait-bar i{display:block;height:100%;background:var(--accent-soft);border-radius:4px;}
+
+    .improve{text-align:left;margin:22px 0 0;padding:28px 26px;background:var(--paper);border:1px solid var(--line);border-radius:14px;}
+    .improve-sub{font-size:.96rem;color:var(--ink-soft);margin:0 0 18px;}
+    .focus-list{list-style:none;margin:0;padding:0;display:grid;gap:14px;}
+    .focus-list li{display:flex;gap:13px;align-items:flex-start;}
+    .focus-list .fnum{flex:none;width:24px;height:24px;border-radius:7px;background:var(--accent-wash);color:var(--accent);font-weight:600;font-size:.82rem;display:inline-flex;align-items:center;justify-content:center;margin-top:2px;}
+    .focus-list .fbody{font-size:.96rem;color:var(--ink);line-height:1.55;}
+    .focus-list .fbody b{font-weight:600;}.focus-list .fbody span{color:var(--ink-soft);}
+
+    .contact{text-align:left;margin:22px 0 0;padding:24px 26px;background:linear-gradient(180deg,#fffdf9,#fbeee6);border:1px solid #f0d9cb;border-radius:14px;}
+    .contact-lead{font-family:"Fraunces",serif;font-weight:600;font-size:1.12rem;margin:0 0 6px;color:var(--accent);}
+    .contact-body{font-size:.98rem;color:var(--ink-soft);margin:0;line-height:1.6;}
+    .contact-body a{color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid var(--accent-soft);}
+    .contact-body a:hover{color:var(--accent-soft);}
+    .contact-body b{color:var(--ink);font-weight:600;}
+    .disclaimer{font-size:.82rem;color:var(--ink-faint);margin:20px auto 0;max-width:52ch;line-height:1.5;}
+
+    .restart{margin-top:26px;}
+    .restart button{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line-strong);}
+    .restart button:hover{background:var(--paper);color:var(--accent);border-color:var(--accent-soft);}
+
+    .fade{animation:fade .45s ease both;}
+    @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+    .hidden{display:none;}
+    @media(max-width:520px){.inner{padding:26px 20px;}.prompt-box{padding:18px;}}
+</style>
+</head>
+<body>
+<div class="container">
+    <!-- Intro -->
+    <div id="intro-screen" class="inner fade">
+        <p class="eyebrow">Writing Proficiency · CEFR A1–C1</p>
+        <h1>Adaptive Writing Assessment</h1>
+        <p class="lede">You will complete three short writing tasks. Each task adapts to your previous response — the topic and length change based on how you write. Your text is analysed automatically.</p>
+        <div class="meta-note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a827a" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+            <span>Each task has its own time limit, shown by a countdown timer. When time runs out, your work is submitted automatically — so keep writing until you are happy with it.</span>
+        </div>
+        <ul class="rules">
+            <li>Write in full sentences and develop your ideas as much as you can.</li>
+            <li>Aim to reach the suggested word count for each task.</li>
+            <li>Please write on your own, without dictionaries, translators, or other help.</li>
+        </ul>
+        <button onclick="startTest()">Begin assessment <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+
+    <!-- Test -->
+    <div id="test-screen" class="hidden">
+        <div class="topbar">
+            <span class="stage-label">Task <b id="stage-num">1</b> of 3</span>
+            <div class="pips" id="pips"></div>
+            <div class="timer" id="timer">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+                <span id="timer-text">00:00</span>
+            </div>
+        </div>
+        <div class="inner">
+            <span class="prompt-tag" id="prompt-tag">Task</span>
+            <div class="prompt-box" id="prompt-box"></div>
+            <div class="task-meta">
+                <span>Suggested length: <b id="word-target"></b></span>
+                <span>Time limit: <b id="time-limit"></b></span>
+            </div>
+            <textarea id="essay" placeholder="Start writing your response here..." oninput="updateWordCount()" spellcheck="false"></textarea>
+            <div class="wc-row">
+                <span class="wc-count"><b id="wc-now">0</b> words</span>
+                <span class="wc-meter"><i class="wc-fill" id="wc-fill"></i></span>
+                <span id="wc-hint">target <span id="wc-target">0</span></span>
+            </div>
+            <button id="submit-btn" onclick="submitEssay(false)">Submit &amp; continue <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+    </div>
+
+    <!-- Grading -->
+    <div id="grading-screen" class="hidden">
+        <div class="grading">
+            <div class="spinner"></div>
+            <p id="grading-text">Analysing your writing…</p>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-screen" class="hidden inner">
+        <span class="result-badge">Assessment complete</span>
+        <h2>Your writing level</h2>
+        <div id="final-level" class="final-score"></div>
+        <p id="feedback-text" class="feedback-text"></p>
+        <div class="scale" id="scale"></div>
+
+        <div class="traits">
+            <h3>How your writing was assessed</h3>
+            <div id="trait-list"></div>
+        </div>
+
+        <div class="improve">
+            <h3>Where to focus next</h3>
+            <p class="improve-sub" id="improve-sub"></p>
+            <ul class="focus-list" id="focus-list"></ul>
+        </div>
+
+        <div class="contact">
+            <p class="contact-lead">Ready to take the next step?</p>
+            <p class="contact-body">Please contact <b>Christopher Mah</b> at <a href="tel:0823459615">082-345-9615</a> or Line ID: <b>pegasus028</b> for further information or to book a trial tutoring lesson.</p>
+        </div>
+
+        <p class="disclaimer">This automated estimate is based on measurable features of your writing (vocabulary range, sentence structure, cohesion, and task length). It is a guide, not a formal qualification — a teacher's review gives the most accurate placement.</p>
+
+        <div class="restart"><button onclick="restart()">Take the test again</button></div>
+    </div>
+</div>
+
+<script>
+// === CEFR Writing Scorer (client-side, no AI/API needed) ===
+const WORDBANK_B2 = new Set("furthermore moreover consequently nevertheless significant substantial particularly essentially demonstrate establish contribute perspective implication considerable framework approach factor impact analyse analyze evaluate maintain sufficient relevant tendency whereas alternatively notably crucial benefit environment society develop decision however although therefore productivity collaboration flexibility organisation organization cohesion balanced uncertain evident advantage disadvantage opportunity convenient priority lifestyle".split(" "));
+const WORDBANK_C1 = new Set("nuanced paradigm albeit notwithstanding insofar pervasive inherent juxtapose ostensibly ramification ramifications underpin discernible cogent salient multifaceted predicated extrapolate dichotomy ubiquitous mitigate intricate compelling profound underscore agency automation unprecedented institutional governance retrospect proponents critics inadvertently uncritical efficiency obscures unpredictable integration".split(" "));
+const CONN_SINGLE = new Set("and but or so because however although therefore thus furthermore moreover consequently nevertheless whereas while since then also additionally firstly secondly finally despite".split(" "));
+const CONN_MULTI = ["for example","such as","in conclusion","on the other hand","as a result","in addition","even though","on one hand"];
+
+function pstdev(arr){ if(arr.length<2) return 0; const m=arr.reduce((a,b)=>a+b,0)/arr.length; return Math.sqrt(arr.reduce((a,b)=>a+(b-m)*(b-m),0)/arr.length); }
+
+function analyzeWriting(text, targetWords){
+  text=(text||"").trim();
+  const words=text.match(/[A-Za-z']+/g)||[];
+  const n=words.length;
+  const sents=text.split(/[.!?]+/).filter(s=>s.trim());
+  const sd=Math.max(1,sents.length);
+  if(n<5) return {band:"Pre-A1", raw:0, words:n, metrics:null};
+  const lw=words.map(w=>w.toLowerCase());
+  const types=new Set(lw).size;
+  const rttr=types/Math.sqrt(n);
+  const ttr=types/n;
+  const adv=lw.filter(w=>WORDBANK_B2.has(w)||WORDBANK_C1.has(w)).length;
+  const c1=lw.filter(w=>WORDBANK_C1.has(w)).length;
+  const longw=lw.filter(w=>w.length>=8).length;
+  const joined=" "+lw.join(" ")+" ";
+  let conn=0;
+  CONN_SINGLE.forEach(c=>{conn+=joined.split(" "+c+" ").length-1;});
+  CONN_MULTI.forEach(c=>{conn+=joined.split(c).length-1;});
+  const sLens=sents.map(s=>(s.match(/[A-Za-z']+/g)||[]).length);
+  const variety=pstdev(sLens);
+  const meanSent=n/sd;
+  const advRate=adv/n, c1Rate=c1/n, longRate=longw/n, connDensity=conn/sd;
+
+  const sLen=Math.min(meanSent/19,1);
+  const sDiv=Math.min(Math.max((rttr-2.8)/4.2,0),1);
+  const sAdv=Math.min(advRate/0.055,1);
+  const sC1=Math.min(c1Rate/0.018,1);
+  const sLong=Math.min(longRate/0.20,1);
+  const sConn=Math.min(connDensity/1.5,1);
+  const sVar=Math.min(variety/7.0,1);
+  const sTask=Math.min(n/targetWords,1);
+  let raw=100*(0.14*sLen+0.14*sDiv+0.16*sAdv+0.10*sC1+0.12*sLong+0.11*sConn+0.11*sVar+0.12*sTask);
+  if(ttr<0.40) raw*=0.55; else if(ttr<0.50) raw*=0.80;
+
+  let band;
+  if(raw>=80) band="C1"; else if(raw>=66) band="B2"; else if(raw>=51) band="B1";
+  else if(raw>=34) band="A2"; else if(raw>=16) band="A1"; else band="Pre-A1";
+
+  return {band, raw:Math.round(raw*10)/10, words:n,
+    metrics:{meanSent, rttr, ttr, advRate, c1Rate, longRate, connDensity, variety, sd,
+             sub:{sLen,sDiv,sAdv,sC1,sLong,sConn,sVar,sTask}}};
+}
+
+
+    const PROMPTS = {
+        'A1': { min:30, max:70,  sec:300, tag:'Everyday writing',
+            text:"Write about your daily routine. What do you do every day? Describe your morning, your afternoon, and your evening." },
+        'A2': { min:50, max:90,  sec:360, tag:'Personal message',
+            text:"Write an email to a friend about a trip you took recently. Where did you go? Who did you go with? What did you do, and did you enjoy it?" },
+        'B1': { min:70, max:120, sec:480, tag:'Opinion essay',
+            text:"Some people prefer to live in a big city, while others prefer the countryside. Which do you prefer, and why? Give reasons and examples to support your opinion." },
+        'B2': { min:120,max:180, sec:600, tag:'Discussion essay',
+            text:"Many companies now allow employees to work from home. Discuss the advantages and disadvantages of remote work, and give your own view on whether it is a positive development." },
+        'C1': { min:180,max:260, sec:720, tag:'Argumentative essay',
+            text:"\u201CTechnological progress always comes at a social cost.\u201D To what extent do you agree with this statement? Support your argument with clear reasoning and relevant examples, and address at least one possible counter-argument." }
+    };
+    const ORDER = ['A1','A2','B1','B2','C1'];
+    const FULL_ORDER = ['Pre-A1','A1','A2','B1','B2','C1'];
+
+    let stage = 1;
+    let promptLevel = 'B1';        // stage 1 anchor
+    let detectedBands = [];        // band detected at each stage
+    let timerId = null, secondsLeft = 0, currentTarget = 0, submitting = false;
+
+    function startTest(){
+        document.getElementById('intro-screen').classList.add('hidden');
+        document.getElementById('test-screen').classList.remove('hidden');
+        loadTask();
+    }
+
+    function renderPips(){
+        let h='';
+        for(let i=1;i<=3;i++){
+            let c='pip'; if(i<stage)c+=' done'; else if(i===stage)c+=' active';
+            h+='<span class="'+c+'"></span>';
+        }
+        document.getElementById('pips').innerHTML=h;
+        document.getElementById('stage-num').innerText=stage;
+    }
+
+    function fmt(s){ const m=Math.floor(s/60), ss=s%60; return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'); }
+
+    function loadTask(){
+        submitting=false;
+        const p=PROMPTS[promptLevel];
+        currentTarget=p.min;
+        renderPips();
+        document.getElementById('prompt-tag').innerText='Task '+stage+' · '+p.tag;
+        document.getElementById('prompt-box').innerHTML='<p>'+p.text+'</p>';
+        document.getElementById('word-target').innerText=p.min+'–'+p.max+' words';
+        document.getElementById('time-limit').innerText=Math.round(p.sec/60)+' minutes';
+        const ta=document.getElementById('essay');
+        ta.value=''; ta.disabled=false;
+        document.getElementById('wc-target').innerText=p.min;
+        updateWordCount();
+        document.querySelector('#test-screen .inner').classList.remove('fade');
+        void document.querySelector('#test-screen .inner').offsetWidth;
+        document.querySelector('#test-screen .inner').classList.add('fade');
+        window.scrollTo({top:0,behavior:'smooth'});
+        startTimer(p.sec);
+        ta.focus();
+    }
+
+    function startTimer(sec){
+        clearInterval(timerId);
+        secondsLeft=sec;
+        const tEl=document.getElementById('timer'), txt=document.getElementById('timer-text');
+        tEl.classList.remove('warn','danger');
+        txt.innerText=fmt(secondsLeft);
+        timerId=setInterval(()=>{
+            secondsLeft--;
+            txt.innerText=fmt(Math.max(secondsLeft,0));
+            if(secondsLeft<=30) tEl.classList.add('danger');
+            else if(secondsLeft<=60){ tEl.classList.add('warn'); tEl.classList.remove('danger'); }
+            if(secondsLeft<=0){ clearInterval(timerId); submitEssay(true); }
+        },1000);
+    }
+
+    function countWords(t){ const m=(t||'').trim().match(/[A-Za-z']+/g); return m?m.length:0; }
+
+    function updateWordCount(){
+        const n=countWords(document.getElementById('essay').value);
+        document.getElementById('wc-now').innerText=n;
+        const pct=Math.min(n/currentTarget*100,100);
+        const fill=document.getElementById('wc-fill');
+        fill.style.width=pct+'%';
+        fill.classList.toggle('met', n>=currentTarget);
+        document.getElementById('wc-hint').innerHTML = n>=currentTarget
+            ? '<span style="color:var(--good);font-weight:600;">target reached</span>'
+            : 'target <span id="wc-target">'+currentTarget+'</span>';
+    }
+
+    function nextPromptLevel(current, band){
+        let ci=ORDER.indexOf(current); if(ci<0)ci=2;
+        let di = band==='Pre-A1' ? 0 : (ORDER.indexOf(band)>=0?ORDER.indexOf(band):ci);
+        if(di>ci) return ORDER[Math.min(ci+1,4)];
+        if(di<ci) return ORDER[Math.max(ci-1,0)];
+        return ORDER[ci];
+    }
+
+    function submitEssay(timedOut){
+        if(submitting) return; submitting=true;
+        clearInterval(timerId);
+        const ta=document.getElementById('essay'); ta.disabled=true;
+        const text=ta.value;
+        const target=PROMPTS[promptLevel].min;
+        const result=analyzeWriting(text, target);  // {band, raw, words, metrics}
+        // blank / time-out with nothing written => lowest level
+        const band = (result.words<5) ? 'Pre-A1' : result.band;
+        detectedBands.push({band, result});
+
+        document.getElementById('test-screen').classList.add('hidden');
+        const gs=document.getElementById('grading-screen');
+        gs.classList.remove('hidden');
+        document.getElementById('grading-text').innerText = timedOut
+            ? "Time's up — analysing your writing…" : "Analysing your writing…";
+
+        setTimeout(()=>{
+            gs.classList.add('hidden');
+            if(stage>=3){ finish(); }
+            else {
+                promptLevel=nextPromptLevel(promptLevel, band);
+                stage++;
+                document.getElementById('test-screen').classList.remove('hidden');
+                loadTask();
+            }
+        }, 1100);
+    }
+
+    function finalLevel(){
+        const idx=detectedBands.map(d=>FULL_ORDER.indexOf(d.band));
+        const w=[0.25,0.35,0.40];
+        let score=0; idx.forEach((v,i)=>score+=v*w[i]);
+        const final=FULL_ORDER[Math.round(score)];
+        const last2=idx.slice(1);
+        const spread=Math.max(...last2)-Math.min(...last2);
+        return {final, spread, idx};
+    }
+
+    const feedbackMap={
+        'C1':'Excellent. Across the tasks you produced complex, well-structured writing with a wide vocabulary and strong cohesion.',
+        'B2':'Very good. You write clearly on abstract topics, link ideas effectively, and use a broad range of vocabulary.',
+        'B1':'Good work. You express opinions and give reasons in connected, mostly accurate writing on familiar topics.',
+        'A2':'A solid foundation. You write simple, connected text about everyday topics and personal experience.',
+        'A1':'A promising start. You can write short, simple phrases and sentences about yourself and familiar things.',
+        'Pre-A1':'You are at the very beginning. Focus on building a core of words and writing short, simple sentences.'
+    };
+    const improvementMap={
+        'Pre-A1':{sub:'Your priority is to build basic words and produce short, correct sentences.',focus:[
+            ['Core vocabulary','Learn everyday words (family, food, places, numbers) so you can write about your own life.'],
+            ['Simple sentences','Practise the pattern subject + verb + object, e.g. "I have a dog."'],
+            ['Capitals and full stops','Start sentences with a capital letter and end them with a full stop.'],
+            ['Write daily','Write two or three sentences about your day, every day, to build the habit.']
+        ]},
+        'A1':{sub:'You can write simple sentences. To reach A2, join your ideas and write a little more.',focus:[
+            ['Linking words','Use "and", "but", "because" and "then" to connect short sentences.'],
+            ['Verb tenses','Practise the past simple so you can write about things that already happened.'],
+            ['Everyday topics','Write short messages — an invitation, a thank-you note, a description of your room.'],
+            ['Word count','Build up to writing 50–70 connected words on one topic.']
+        ]},
+        'A2':{sub:'You write connected everyday text. To reach B1, give opinions and reasons on familiar topics.',focus:[
+            ['Express opinions','Practise phrases like "I think…", "In my opinion…", "I prefer… because…".'],
+            ['Paragraphing','Group related ideas together and start a new paragraph for a new idea.'],
+            ['Wider connectors','Use "however", "for example", and "therefore" to structure your ideas.'],
+            ['Range of tenses','Mix present, past, and future to add detail and time references.']
+        ]},
+        'B1':{sub:'You give opinions clearly. To reach B2, discuss both sides and write longer, more developed texts.',focus:[
+            ['Balanced argument','Present advantages and disadvantages before giving your own view.'],
+            ['Advanced cohesion','Use "furthermore", "consequently", "on the other hand" to link paragraphs.'],
+            ['Precise vocabulary','Replace simple words with more exact ones (e.g. "important" → "significant").'],
+            ['Complex sentences','Combine ideas using relative clauses ("which", "who") and subordination.']
+        ]},
+        'B2':{sub:'You write well on abstract topics. To reach C1, aim for precision, nuance, and sophisticated structure.',focus:[
+            ['Nuance and hedging','Use "tends to", "arguably", "to some extent" to express careful judgement.'],
+            ['Counter-arguments','Acknowledge an opposing view and respond to it within your essay.'],
+            ['Lexical sophistication','Use less common, precise vocabulary and avoid repetition.'],
+            ['Cohesive flow','Vary sentence openings and use referencing to make ideas flow seamlessly.']
+        ]},
+        'C1':{sub:'You write at an advanced level. To consolidate toward C2, refine style, tone, and subtlety.',focus:[
+            ['Stylistic control','Adapt tone and register precisely to purpose and audience.'],
+            ['Idiomatic range','Incorporate idiomatic and figurative language naturally.'],
+            ['Sophisticated structure','Use varied rhetorical devices and tightly controlled paragraphing.'],
+            ['Wide reading','Read advanced non-fiction to absorb nuance and broaden expression.']
+        ]}
+    };
+
+    function finish(){
+        const {final}=finalLevel();
+        // boundary label if final stages disagree
+        let levelLabel=final;
+        document.getElementById('results-screen').classList.remove('hidden');
+        document.getElementById('results-screen').classList.add('fade');
+        document.getElementById('final-level').innerText=levelLabel;
+        document.getElementById('feedback-text').innerText=feedbackMap[final];
+
+        document.getElementById('scale').innerHTML=FULL_ORDER.map(s=>
+            '<span class="step'+(s===final?' on':'')+'">'+s+'</span>').join('');
+
+        // trait bars from the LAST substantive submission's metrics
+        const lastWithMetrics=[...detectedBands].reverse().find(d=>d.result.metrics);
+        const traitEl=document.getElementById('trait-list');
+        if(lastWithMetrics){
+            const sub=lastWithMetrics.result.metrics.sub;
+            const traits=[
+                ['Sentence development', sub.sLen],
+                ['Vocabulary range', Math.max(sub.sAdv,sub.sLong)],
+                ['Lexical variety', sub.sDiv],
+                ['Cohesion & linking', sub.sConn],
+                ['Sentence variety', sub.sVar],
+                ['Task completion', sub.sTask]
+            ];
+            traitEl.innerHTML=traits.map(([name,v])=>{
+                const pct=Math.round(Math.min(Math.max(v,0),1)*100);
+                const word = pct>=75?'Strong':pct>=45?'Developing':'Emerging';
+                return '<div class="trait"><div class="trait-head"><span class="tname">'+name+
+                    '</span><span class="tval">'+word+'</span></div>'+
+                    '<div class="trait-bar"><i style="width:'+pct+'%"></i></div></div>';
+            }).join('');
+        } else {
+            traitEl.innerHTML='<p style="color:var(--ink-faint);font-size:.95rem;margin:0;">No text was submitted, so detailed traits are unavailable.</p>';
+        }
+
+        const imp=improvementMap[final];
+        document.getElementById('improve-sub').innerText=imp.sub;
+        document.getElementById('focus-list').innerHTML=imp.focus.map((f,i)=>
+            '<li><span class="fnum">'+(i+1)+'</span><span class="fbody"><b>'+f[0]+'.</b> <span>'+f[1]+'</span></span></li>').join('');
+
+        window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function restart(){
+        stage=1; promptLevel='B1'; detectedBands=[]; submitting=false;
+        clearInterval(timerId);
+        document.getElementById('results-screen').classList.add('hidden');
+        document.getElementById('test-screen').classList.remove('hidden');
+        loadTask();
+    }
+</script>
+</body>
+</html>
